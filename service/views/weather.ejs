@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name = "viewport" content = "width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable = 0" />
+<head>
+	<meta charset="UTF-8">
+	<title>weather report</title>
+</head>
+<link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css">
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.1/css/bootstrap-theme.css">
+<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.1/fonts/glyphicons-halflings-regular.svg">
+<style>
+	*{
+		padding:0px;
+		margin:0px;
+	}
+	#map{
+		width:100%;
+		height:30%;
+		position:absolute;
+		top:0;
+		left:0;
+	}
+	#weatherBox{
+		
+		width:100%;
+		height:70%;
+		position:absolute;
+		top:30%;
+		left:0px;
+		border-top: 1px solid gray;
+	}
+	#weatherBox>h3{
+		text-align: center;
+		line-height: 30px;
+		height:30px;
+		width:100%;
+		font-size:14px;
+		font-weight: '隶书';
+		background:rgba(189, 22, 22, 0);
+		color:white;
+	}
+    .addressInfo{
+    	width:100%;
+    	height:30px;
+    	font-size:12px;
+    	background:rgba(0, 0, 0, 0.15);
+    	color:white;
+    }
+    .addressInfo>span{
+        display:inline-block;
+        height:100%;
+        line-height: 30px;
+    }
+    .address{
+    	float:left;
+    	margin-left: 20px;
+    }
+    .fa-clock-o,.fa-map-marker{
+    	font-size:16px;
+    }
+    .time{
+    	float:right;
+    	margin-right: 20px;
+    }
+	.amap-copyright{
+		display: none!important;
+	}
+	.amap-logo{
+		display: none!important;
+	}
+	.amap-geolocation-con{
+		position: absolute;
+		transform: scale(0.8);
+		bottom:0px!important;
+		left:5px!important;
+	}
+	.today{
+		position: relative;
+		width:100%;
+		height:160px;   
+	}
+	.filter,.TodayInfo{
+		width:100%;
+		height:100%;
+		position:absolute;
+		top:0px;
+		left:0px;
+	}
+	.filter{
+
+		z-index: 100;
+	}
+	.filter>img{
+		width:100%;
+		height:100%;
+	}
+	.TodayInfo{
+		z-index: 107;
+		 background-color: rgba(0,0,0,0.4);
+		 color:white;
+		 font-family: "微软雅黑";
+	}
+	.TodayInfo>h3>span{
+		padding-left: 10px;
+	}
+	.titlebox{
+		text-align: center;
+		background:rgba(255, 0, 0, 0.88);
+	}
+	.titlebox>h3{
+		padding-left:10px;
+		font-size: 20px;
+		height:30px;
+		line-height: 30px;
+		font-family: "微软雅黑";
+		color:white;
+	}
+
+    .fa-sun-o{
+    	float:right;
+    	margin-right: 40px;
+    	line-height: 30px;
+    	display: none;
+    }
+	.loaddingText{
+		display: none;
+	}
+	.temperature{
+		float: left;
+		margin-left: 10px;
+		font-size: 14px;
+		padding-top:5px;
+	}
+    .wind{
+    	float:right;
+    	margin-right: 40px;
+    	font-size: 14px;
+    	line-height: 30px;
+    }
+    .humidity{
+    	float:right;
+    	margin-right: 40px;
+    	font-size: 14px;
+    	line-height: 30px;
+    }
+    .advise{
+    	
+    	height:100px;
+    	/*background: yellow;*/
+    	position: absolute;
+    	top:60px;
+    	margin-left: 10px;
+    	margin-right: 10px;
+    }
+    .dressing_advice,.wash_index,.exercise_index{
+    	font-size: 10px;
+    	margin-top: 3px;
+    }
+    .future{
+    	width:100%;
+    	height:330px;
+    	/*background:blue;*/
+    }
+    .item{
+    	width:100%;
+    	height:55px;
+    	border-bottom:1px #eee solid;
+    	box-sizing: border-box;
+    	padding-top: 4px;
+    }
+    .futureReportBox{
+    	width:100%;
+    	height:30px;
+    	background:red;
+    }
+    .futureReport{
+        width:50%!important;
+    	height: 30px;
+    	font-size: 16px;
+    	text-align: left!important;
+    	margin-left: 10px;
+    	line-height: 30px;
+    	letter-spacing: 3px;
+    	color:white;
+
+    }
+    .power{
+    	height:40px;
+    	line-height: 40px;
+    	font-size: 10px;
+    	text-align: center;
+    	color:white;
+    	background:black;
+    }
+    .winds{	
+    	float:right;
+    	margin-right: 40px;
+    	font-size: 14px;
+    	line-height: 30px;
+	    position: absolute;
+        right: -20px;
+    }
+    .itemWeather{
+    	    padding-left: 10px;
+    }
+</style>
+<body>
+	<div id="map"></div>
+	<div id="weatherBox">
+		<div class="titlebox">
+			<h3 class="title"><i class="fa fa-cloud"></i>&nbsp;&nbsp;天气预报</h3>
+		</div>
+		<div class="addressInfo" id="addressInfo">
+			
+	    </div>
+	    <div class="today" id="today">
+
+	    </div>
+	    <div class="futureReportBox"><h3 class="futureReport"><i class="fa fa-line-chart"></i>&nbsp;趋势预报</h3></div>
+	    <div class="future" id="future">
+	   <!--  	<div class="item">
+	    		 <div class="itemWeather">
+	    		 	<span class="weather">多云</span>
+	    		 	<span class="week">星期五</span>
+	    		 	<span class="time">2017-08-14 14:34</span>
+	    		 </div>
+	    		 <div class="itemTemperature">
+	    		 	<span class="temperature">22℃~27℃</span>
+	    		 	<span class="wind">南风 2级</span>
+	    		 </div>
+	    	</div> -->
+	    	<div class="clearfloat"></div>
+	    </div>
+	    <div class="power">
+	    	<span>Copyright ©2017 Codeing168.top  Powered By Kasa </span>
+	    </div>
+    </div>
+</body>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/2.2.3/jquery.js"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/bootstrap/3.3.1/js/bootstrap.js"></script>
+<script type="text/javascript" src = 'https://webapi.amap.com/maps?v=1.4.0&key=d77ea90c97069ad0b74183b70b648653'></script>
+<script>
+	// 避免不支持，js使用ES5
+	window.onload=function(){
+       
+	
+	     var todayDate='';
+	     var locationPlace='';
+	     var map = new AMap.Map('map', {
+	        resizeEnable: true,
+	        zoom:17,
+	        zooms:[3,22],
+	    });
+	    var locationComplete = function(data){
+	    	    
+                   locationPlace=data.addressComponent.province+data.addressComponent.city+data.addressComponent.district;
+                   if(data.type==='complete'&&data.info==='SUCCESS'){
+                      //通过ajax 获取数据
+                   getWeatehrResult(data.position.lng,data.position.lat,locationPlace);
+                   }
+                   
+	               };
+	    var locationError = function(){
+	      alert('定位失败，请在手机上开启定位:设置->隐私->定位服务->reactNativeApp->使用应用权限');
+	      }; 
+	     //地图定位
+	    map.plugin('AMap.Geolocation',function (){
+	        geolocation = new AMap.Geolocation({
+	                enableHighAccuracy: true,//是否使用高精度定位，默认:true
+	                timeout: 60000,          //超过10秒后停止定位，默认：无穷大
+	                maximumAge: 1000,           //定位结果缓存0毫秒，默认：0
+	                convert: true,           //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
+	                showButton: true, //显示定位按钮，默认：true    
+	                buttonPosition: 'LB',    //定位按钮停靠位置，默认：'LB'，左下角
+	                buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+	                showMarker: true,        //定位成功后在定位到的位置显示点标记，默认：true
+	                showCircle: true,        //定位成功后用圆圈表示定位精度范围，默认：true
+	                panToLocation: true,     //定位成功后将定位到的位置作为地图中心点，默认：true
+	                zoomToAccuracy:true      //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+	            });
+	        map.addControl(geolocation);
+	        geolocation.getCurrentPosition();
+	        AMap.event.addListener(geolocation, 'complete', locationComplete);
+	        AMap.event.addListener(geolocation, 'error', locationError);  
+	    });
+	    //地图比例尺
+	    // map.plugin(["AMap.Scale"],function(){ 
+	    //     map.addControl(new AMap.Scale()); 
+	    // });
+	    // map + -
+	    map.plugin(["AMap.ToolBar"],function(){ 
+	        map.addControl(new AMap.ToolBar());
+	    });
+	     //切换图层 
+	    // map.plugin(["AMap.MapType"],function(){ 
+	    //  var type= new AMap.MapType({ defaultType:0 });
+	    //   map.addControl(type); 
+	    // });
+	    //ajax通过经纬度获取天气数据
+	    // JH2dd47c71a23f7f0b0f7671ed96645302
+	    // $.ajax({
+	    //   url: 'http://v.juhe.cn/weather/geo?format=2&key=8815f7c0fbb797af7f27305a8bcbff61&lon=116.39277&lat=39.933748',
+	    //   type: 'get',
+	    //   dataType: 'JSONP',
+	    //   data: {lon:116.39277,lat:39.933748},
+	    //   crossDomain: true, 
+	    //   complete: function(xhr, textStatus) {
+	    //     console.log(textStatus+'complete'+xhr);
+	    //   },
+	    //   success: function(data, textStatus, xhr) {
+	    //     //called when successful
+	    //     console.log(data);
+	    //   },
+	    //   error: function(xhr, textStatus, errorThrown) {
+	    //     //called when there is an error
+	    //     console.log('error'+errorThrown);
+	    //   }
+	    // });
+	    function renderData(result,locationPlace){
+          //调用本地的测试数据json
+        var weatherList ='';
+        var today = '';
+	    var weatherData =result;
+		var weatherArr = [];
+		  try{
+		   var data = weatherData.result;
+		   var TodayInfo = `	
+		            <div class="filter">
+			    		<img src="/images/1.jpg" alt="">
+			    	</div>
+			    	<div class="TodayInfo">
+			    		<h3><span>${data.today.weather}</span><span class="wind"><i class="fa fa-flag-o"></i>&nbsp;&nbsp;${data.sk.wind_direction}&nbsp;${data.sk.wind_strength}</span></h3>
+			    	    
+			    	    <span class="temperature"><i class="fa fa-thermometer-half"></i>&nbsp;&nbsp;温度:${data.today.temperature}</span>
+			    	    <span class="humidity">湿度:${data.sk.humidity}</span>
+			    	    <div class="advise">
+			    	    	<div class="dressing_advice">
+			    	    		<span>出行建议:</span>
+			    	    		<span>${data.today.dressing_advice}</span>
+			    	    	</div>
+			    	    	<div class="exercise_index">
+			    	    	    <span>运动建议:</span>
+			    	    	    <span>${data.today.exercise_index}</span>
+			    	        </div>
+			    	    	<div class="wash_index">
+			    	    		<span>驾车建议:</span>
+			    	    		<span>${data.today.travel_index}</span>
+			    	       </div>
+			    	    </div>
+			    	</div>`;
+
+
+		       $('#today').html(TodayInfo);
+
+
+
+		   var future = data.future;
+		   
+		   //获取日期
+		   todayDate=data.today.date_y;
+		   var addressInfoStr=`<span class="address"><i class="fa fa-map-marker"></i>&nbsp;&nbsp;<span class="loaddingText">正在定位中.....</span><span>${locationPlace}</span></span>
+					<span class="time"><i class="fa fa-clock-o"></i>&nbsp;&nbsp;<span>${todayDate}</span></span>`;
+		   $('#addressInfo').html(addressInfoStr);
+		   
+		   for(var i in future){   
+		    weatherArr.push(future[i]);
+		   }
+
+		   for(var i=1;i<weatherArr.length;i++){
+		   var item=`<div class="item">
+			    		 <div class="itemWeather">
+			    		 	<span class="weather">${weatherArr[i].weather}</span>
+			    		 	<span class="week">${weatherArr[i].week}</span>
+			    		 	<span class="time">${weatherArr[i].date.toString().substring(0,4)}-${weatherArr[i].date.substring(4,6)}-${weatherArr[i].date.substring(6,8)}</span>
+			    		 </div>
+			    		 <div class="itemTemperature">
+			    		 	<span class="temperature">${weatherArr[i].temperature}</span>
+			    		 	<span class="winds">${weatherArr[i].wind}</span>
+			    		 </div>
+			    	</div>
+			    	<div class="clearfloat"></div>`;
+			weatherList+=item;
+		   }
+		   $('#future').html(weatherList);
+
+		  }catch(e){
+		   console.log("data type is error  can't parse to json ");
+		  }
+	   
+	    }
+	    function getWeatehrResult(lng,lat,locationPlace){
+            //ajax通过经纬度获取天气数据
+	    $.ajax({
+	      url: 'http://v.juhe.cn/weather/geo?format=2&key=8815f7c0fbb797af7f27305a8bcbff61',
+	      type: 'get',
+	      dataType: 'JSONP',
+	      data: {lon:lng,lat:lat},
+	      crossDomain: true, 
+	      complete: function(xhr, textStatus) {
+	        console.log(textStatus+'complete'+xhr);
+	      },
+	      success: function(data, textStatus, xhr) {
+	        //called when successful
+	   
+	        if(textStatus==='success'){
+                renderData(data,locationPlace);
+	        }
+	        
+	      },
+	      error: function(xhr, textStatus, errorThrown) {
+	        //called when there is an error
+	        console.log('error'+errorThrown);
+	      }
+	    });
+
+	    }
+    
+	}
+
+</script>
+</html>

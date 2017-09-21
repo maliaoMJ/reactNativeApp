@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--width - 可视区域的宽度，值可为数字或关键词device-width -->
+    <!--height - viewport的高度-->
+    <!--initial-scale - 初始的缩放比例-->
+    <!--minimum-scale - 允许用户缩放到的最小比例-->
+    <!--maximum-scale - 允许用户缩放到的最大比例-->
+    <!--user-scalable - 用户是否可以手动缩放-->
+    <meta name = "viewport" content = "width = device-width, initial-scale = 1.0, maximum-scale = 1.0, user-scalable = 0" />
+    <!--content="telephone=yes" 在iPhone 手机上默认值是（电话号码显示为拨号的超链接）：-->
+    <!--可将telephone=no，则手机号码不被显示为拨号链接-->
+    <!--使设备浏览网页时对数字不启用电话功能（不同设备解释不同，itouch点击数字为存入联系人，iphone为拨打电话），忽略将页面中的数字识别为电话号码。-->
+    <meta name="format-detection" content="telephone=no" />
+    <!--忽略识别邮箱-->
+    <meta name="format-detection" content="email=no" />
+    <!--网站开启对 web app 程序的支持-->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!--在 web app 应用下状态条（屏幕顶部条）的颜色；(改变顶部状态条的颜色)-->
+    <!--默认值为 default（白色），可以定为 black（黑色）和 black-translucent（灰色半透明）；-->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <!--http-equiv="Content-Type" 表示描述文档类型-->
+    <!--HTTP-EQUIV类似于HTTP的头部协议，它回应给浏览器一些有用的信息，以帮助正确和精确地显示网页内容-->
+    <meta http-equiv="Content-Type" content="text/html">
+    <!-- UC默认竖屏 ，UC强制全屏 -->
+    <meta name="full-screen" content="yes">
+    <!--使用了application这种应用模式后，页面讲默认全屏，禁止长按菜单，禁止收拾，标准排版，以及强制图片显示。-->
+    <!--应用模式-->
+    <meta name="browsermode" content="application">
+    <!-- QQ强制竖屏 QQ强制全屏 -->
+    <!--设置屏幕方向-->
+    <meta name="x5-orientation" content="portrait">
+    <!--设置全屏-->
+    <meta name="x5-fullscreen" content="true">
+    <!--设置屏幕模式-->
+    <meta name="x5-page-mode" content="app">
+    <!-- windows phone 点击无高光 -->
+    <meta name="msapplication-tap-highlight" content="no">
+    <title>公共地图</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.1.1/css/bootstrap.css">
+    <link rel="stylesheet" href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.css">
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        body{
+        }
+        #container{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .map{
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 660;s
+        }
+        .positionIcon{
+            width: 30px;
+            height:30px;
+            background: rgba(0,0,0,0.7);
+            border-radius: 3px;
+            position: relative;
+            bottom: 18px;
+            left: 30px;
+            z-index: 666;
+            cursor: pointer;
+        }
+        .positionIcon>i{
+            display:block;
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            width: 20px;
+            height: 20px;
+            color: #0077ff;
+            text-align: center;
+            line-height: 20px;
+        }
+        .amap-copyright,.amap-logo{
+            display: none!important;
+        }
+        .amap-scale-line {
+            position: relative;
+            bottom: -15px;
+            height: 8px;
+        }
+        .amap-scale-text {
+            text-align: center;
+            font-size: 10px;
+            position: relative;
+            top: 10px;
+        }
+        .searchResult{
+         position: fixed;
+         bottom: 0px;
+         width:100%;
+         height:40%;
+         z-index: 996;
+         background: white;
+         transition-duration: 0.8s;
+         display: none;
+
+        }
+        #panel {
+        position: absolute;
+        top:30px;
+        background-color: white;
+        overflow-y: auto;
+        width:100%;
+        max-height:90%;
+        }
+        #walk{
+            position: absolute;
+            top:30px;
+            background-color: white;
+            overflow-y: auto;
+            width:100%;
+            max-height:90%;
+            display: none;
+        }
+        .infoText{
+            position: absolute;
+            top:0px;
+            width:100%;
+            height: 30px;
+            text-align: center;
+            line-height: 30px;
+            letter-spacing: 3px;
+            background: black;
+            font-weight: bolder;
+            color:white;
+            cursor: pointer;
+        }
+        .closeButton{
+            display: block;
+            float: right;
+            margin-right: 2%;
+            width:20px;
+            height:20px;
+            margin-top: 5px;
+            font-size: 14px;
+            border-radius: 50%;
+            border:1px solid white;
+            box-sizing: border-box;
+            line-height: 15px;
+            text-align: center;
+            padding-left: 5px;
+        }
+        .closeAminted{
+            height:0;
+        }
+        .open{
+            height:40%;
+        }
+        .loaddingBox{
+            position:absolute;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 999;
+
+           }
+           .loadding{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 100px;
+            margin-left: -100px;
+            margin-top: -50px;
+            background:white;
+            border-radius: 5px;
+           }
+           .loaddingText{
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 40px;
+            width: 100%;
+            line-height: 40px;
+            text-align: center;
+            /* background: red; */
+            border-bottom-left-radius: 5px;
+            border-bottom-right-radius: 5px;
+           }
+           .loaddingImg{
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 60px;
+            width: 100%;
+            line-height: 40px;
+            text-align: center;
+            /* background: yellow; */
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+           }
+          .spinner {
+              width: 40px;
+              height: 40px;
+              position: relative;
+              margin: 15px auto;
+            }
+
+    .double-bounce1, .double-bounce2 {
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          background-color: blue;
+          opacity: 0.8;
+          position: absolute;
+          top: 0;
+          left: 0;
+          font-size: 20px;
+          color: white;
+
+          -webkit-animation: bounce 2.0s infinite ease-in-out;
+          animation: bounce 2.0s infinite ease-in-out;
+        }
+
+        .double-bounce2 {
+          -webkit-animation-delay: -1.0s;
+          animation-delay: -1.0s;
+        }
+        .BMap_geolocationContainer{
+            position: relative;
+            left: 20px;
+            bottom: 20px;
+        }
+
+        @-webkit-keyframes bounce {
+          0%, 100% { -webkit-transform: scale(0.0) }
+          50% { -webkit-transform: scale(1.0) }
+        }
+
+        @keyframes bounce {
+          0%, 100% {
+            transform: scale(0.0);
+            -webkit-transform: scale(0.0);
+          } 50% {
+            transform: scale(1.0);
+            -webkit-transform: scale(1.0);
+          }
+        }
+        .info-title {
+            color: white;
+            font-size: 14px;
+            background-color:blue;
+            line-height: 26px;
+            padding: 0px 0 0 6px;
+            font-weight: lighter;
+            letter-spacing: 1px
+        }
+        .info-content {
+            font: 12px Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial;
+            padding: 4px;
+            color: #666666;
+            line-height: 23px;
+        }
+        .info-content img {
+            float: left;
+            margin: 3px;
+        }
+        .amap-maptype-list{
+            display: none!important;
+        }
+        .search-button{
+            width:36px!important;
+        }
+        .amap-call{
+            display: none!important;
+        }
+        .markDefault{
+            width:60px;
+            height:20px;
+            background:orange;
+            color: white;
+            text-align: center;
+            box-shadow: 2px 2px 5px black;
+            line-height: 20px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .infoWindow{
+        width:320px;
+        height:150px;
+        font-size:13px;
+        background-color:#fff;
+        box-shadow: 2px 2px 2px #888;
+        padding-bottom: 20px;
+      }
+      .info_arrow{
+        height:20px;
+        width:20px;
+        transform:rotate(-45deg);
+        -ms-transform:rotate(-45deg);
+        -moz-transform:rotate(45deg);
+        -webkit-transform:rotate(45deg);
+        -o-transform:rotate(45deg);
+        padding-left: 0 !important;
+        position: absolute;
+        left:125px;
+        top:132px;
+        background-color:#ffffff;
+        z-index: 4;
+      }
+      .info_title{
+        background-color:#ffbc00;
+        height:28px;line-height:28px;color:#fff;padding-left:10px;
+      }
+      .infoWindow>div{padding-left:10px;margin-bottom:5px;}
+      .info_name{margin-top:10px;}
+      .info_address{color: #434754;}
+      .info_type{color: #434754;}
+      .info_dis{}
+      .dis_span{color: #FA2D00;font-weight: bold;}
+      .info_close{position: absolute;width:28px;height:26px;right:6px;top:0;}
+      .loc_circle{width:50px;height:50px;border:2px solid #49B3F4;
+        border-radius:50px;background-color:#64C7FA;opacity:0.5;}
+      .loc_img{position: relative;left:0;top:-34px;}
+      .fa-times-circle{font-size: 22px;padding-top:3px;padding-right: 6px;color:white;}
+      .router{
+        color:#0072ff;
+        cursor: pointer;
+      }
+    </style>
+</head>
+<body>
+   <div id="container" >
+       <div class="map" id="map"></div>
+       <div class="searchResult" id="searchResult">
+           <div class="infoText">
+               <span class="infoTitle" id="infoTitle">附近餐饮店</span>
+               <span class="closeButton" id="closeButton">&times;</span>
+           </div>
+           <div id="panel"></div>
+           <div class="walk" id="walk"></div>
+       </div>
+        <div class="loaddingBox" id="loaddingBox">
+            <div class="loadding">
+                <div class="loaddingImg">
+                    <div class="spinner">
+                      <div class="double-bounce1"><i class="glyphicon glyphicon-map-marker" ></i></div>
+                      <div class="double-bounce2"><i class="glyphicon glyphicon-map-marker" ></i></div>
+                    </div>
+                </div>
+                <div class="loaddingText">
+
+                    <span>请稍后,正在定位中...</span>
+                </div>
+
+            </div>
+        </div>
+   </div>
+</body>
+<script type="text/javascript" src="https://cdn.bootcss.com/jquery/2.0.2/jquery.js"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+<script type="text/javascript" src = 'https://webapi.amap.com/maps?v=1.4.0&key=d77ea90c97069ad0b74183b70b648653'></script>
+<script type="text/javascript">
+   //全局变量 经度lng 纬度lat
+   var flag = false;//控制动画是否加载超时，默认5s
+   var closeButton = document.getElementById('closeButton');
+   var searchResult = document.getElementById('searchResult');
+   var loaddingBox = document.getElementById("loaddingBox");
+   var infoTitle = document.getElementById('infoTitle');
+   var walk = document.getElementById('walk');
+   var panel = document.getElementById('panel');
+   var beginPlace = null;//起点坐标
+   var destination = null;//终点坐标
+   var walking = null;
+   //关闭搜索结果
+   closeButton.onclick=function(){
+     searchResult.setAttribute("class", "searchResult closeAminted");
+   }
+   // Loading 获取地址位置加载过程的动画
+    function LoadingAnimated(flagAdimated){
+       if(flagAdimated){
+          loaddingBox.style.display="none";
+          flag = true;
+       }else{
+          loaddingBox.style.display="block";
+          flag = false;
+       }
+    }
+    //定时超时函数
+    setTimeout(function(){
+        if(flag){
+          console.log('定位成功,loadding加载动画结束！');
+        }else{
+          alert('定时超时,请检查您的网络或者应用定位权限！');
+          LoadingAnimated(true);
+
+        }
+    },60000)//60秒超时
+     var LocationIcon = `<div class="positionIcon"><i class="glyphicon glyphicon-map-marker"></i></div>`;//定位图标
+     //地图示例
+     var map = new AMap.Map('map', {
+        resizeEnable: true,
+        zoom:17,
+        zooms:[3,22],
+    });
+    var locationComplete = function(data){
+        searchResult.style.display = 'block';
+        searchResult.setAttribute("class", "searchResult open");
+        panel.style.display = 'block';
+         walk.style.display = 'none';
+         infoTitle.innerHTML="附近餐饮店";
+        LoadingAnimated(true);//关闭加载动画
+
+
+        // map.clearMap();
+        getResult([data.position.lng,data.position.lat]);
+               };
+    var locationError = function(){
+      alert('定位失败，请在手机上开启定位:设置->隐私->定位服务->reactNativeApp->使用应用权限');
+      };
+     //地图定位
+    map.plugin('AMap.Geolocation',function (){
+        geolocation = new AMap.Geolocation({
+                enableHighAccuracy: true,//是否使用高精度定位，默认:true
+                timeout: 60000,          //超过10秒后停止定位，默认：无穷大
+                maximumAge: 1000,           //定位结果缓存0毫秒，默认：0
+                convert: true,           //自动偏移坐标，偏移后的坐标为高德坐标，默认：true
+                showButton: true, //显示定位按钮，默认：true
+                buttonDom:LocationIcon,//地位小图标
+                buttonPosition: 'LB',    //定位按钮停靠位置，默认：'LB'，左下角
+                buttonOffset: new AMap.Pixel(10, 20),//定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+                showMarker: true,        //定位成功后在定位到的位置显示点标记，默认：true
+                showCircle: true,        //定位成功后用圆圈表示定位精度范围，默认：true
+                panToLocation: true,     //定位成功后将定位到的位置作为地图中心点，默认：true
+                zoomToAccuracy:true      //定位成功后调整地图视野范围使定位位置及精度范围视野内可见，默认：false
+            });
+        map.addControl(geolocation);
+        geolocation.getCurrentPosition();
+        AMap.event.addListener(geolocation, 'complete', locationComplete);
+        AMap.event.addListener(geolocation, 'error', locationError);
+    });
+    //地图比例尺
+    map.plugin(["AMap.Scale"],function(){
+        map.addControl(new AMap.Scale());
+    });
+    // map + -
+    map.plugin(["AMap.ToolBar"],function(){
+        map.addControl(new AMap.ToolBar());
+    });
+     //切换图层
+    map.plugin(["AMap.MapType"],function(){
+     var type= new AMap.MapType({ defaultType:0 });
+      map.addControl(type);
+    });
+    //步行规划
+    AMap.service('AMap.Walking', function(){
+      walking= new AMap.Walking({
+        map: map,
+        panel:'walk'
+      });
+    });
+    //关闭提示框
+    function closeInfoTips(){
+      map.clearInfoWindow();
+    }
+    //获取线路
+    function  getRouter(){
+         searchResult.style.display = 'block';
+         searchResult.setAttribute("class", "searchResult open");
+         panel.style.display = 'none';
+         walk.style.display = 'block';
+         infoTitle.innerHTML="步行线路规划";
+
+    }
+    //附近搜索
+    function getResult(center){
+       AMap.service(["AMap.PlaceSearch"], function() {
+        var placeSearch = new AMap.PlaceSearch({ //构造地点查询类
+            pageSize: 10,//每页展示的数据十条
+            type: '餐饮服务',
+            pageIndex: 1,
+            showCover:false,
+            renderStyle:'newpc',
+            map:map,
+            panel:'panel'
+        });
+        placeSearch.searchNearBy('',center, 500, function(status, result) {
+            if(result.info==='OK'&status==="complete"){
+                var pois = result.poiList.pois;
+
+                pois.forEach(function(poi){
+                    //标记搜索地点
+                    var markDiv = '<div class="markDefault"><i class="fa fa-odnoklassniki-square" aria-hidden="true"></i>&nbsp;&nbsp;&nbsp;' + poi.distance + '米</div>';
+                    var marker = new AMap.Marker({
+                        position: poi.location,
+                        title: poi['name'],
+                        map: map,
+                        content: markDiv,
+                        offset: new AMap.Pixel(0,0)
+                      });
+                    //展示提示tip
+                    var info = '<div class="infoWindow"><div class="info_title">附近餐饮店&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="router" onclick="getRouter()"><i class="fa fa-map-marker"></i>&nbsp;&nbsp;导航</span></div>'
+                        + '<div class="info_name">名称: ' + poi.name+ '</div>'
+                        + '<div class="info_dis">距您: ' + '<span class="dis_span">' + poi.distance + '米</span>' + '</div>'
+                        + '<div class="info_address">地址: ' + poi.address+ '</div>'
+                        + '<div class="info_type">类型: ' + (poi.type || '小吃,餐饮')+ '</div>'
+                        + '<div class="info_arrow"></div><div class="info_close" onclick="closeInfoTips()"><i class="fa fa-times-circle"></i></div>'
+                        + '</div>';
+                    function showInfoTips(){
+                        panel.style.display = 'block';
+                         walk.style.display = 'none';
+                         infoTitle.innerHTML="附近餐饮店";
+                      var infowindow = new AMap.InfoWindow({
+                          content: info,
+                          offset: new AMap.Pixel(40,-35),
+                          isCustom: true,
+
+                        });
+                        infowindow.open(map, poi.location);
+                        //步行路径规划
+                        walking.clear();
+                        var start = new AMap.LngLat(center[0], center[1]);
+                        var end = poi.location;
+                        destination = end;
+                        beginPlace = start;
+                        walking.search(start, end);
+                    }
+                    AMap.event.addListener(marker, 'click', showInfoTips);
+                    });
+            }else{
+                alert('所在地点暂时没有查询结果');
+            }
+
+        });
+    });
+}
+</script>
+
+</html>
